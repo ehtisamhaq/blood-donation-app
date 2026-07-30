@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Environment variables
+.env
+
+# Database local sqlite fallback
+*.sqlite3
+
+# Static / Media files
+/staticfiles/
+/media/
