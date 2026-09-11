@@ -16,6 +16,9 @@ urlpatterns = [
     path('donors/', views.donors_list_view, name='donors_list'),
     path('donors/<int:pk>/', views.donor_detail_view, name='donor_detail'),
 
+    # Guide
+    path('guide/', views.guide_view, name='guide'),
+
     # Authentication & Profile
     path('register/', views.register_view, name='register'),
     path('login/', views.login_view, name='login'),

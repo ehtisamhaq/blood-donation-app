@@ -52,6 +52,7 @@ def requests_list_view(request):
     urgency = request.GET.get('urgency', '').strip()
     location = request.GET.get('location', '').strip()
     status = request.GET.get('status', 'active').strip()
+    date_range = request.GET.get('date_range', '').strip()
 
     requests_qs = BloodRequest.objects.select_related('requester').all()
 
@@ -70,6 +71,11 @@ def requests_list_view(request):
         requests_qs = requests_qs.filter(
             Q(location__icontains=location) | Q(hospital__icontains=location)
         )
+    
+    if date_range == '24h':
+        requests_qs = requests_qs.filter(created_at__gte=timezone.now() - timedelta(hours=24))
+    elif date_range == '3d':
+        requests_qs = requests_qs.filter(created_at__gte=timezone.now() - timedelta(days=3))
 
     if query:
         requests_qs = requests_qs.filter(
@@ -92,6 +98,7 @@ def requests_list_view(request):
         'urgency': urgency,
         'location': location,
         'status': status,
+        'date_range': date_range,
         'blood_groups': BloodGroup.choices,
         'urgency_levels': UrgencyLevel.choices,
         'total_count': requests_qs.count(),
@@ -242,6 +249,11 @@ def donor_detail_view(request, pk):
         'donor': donor,
     }
     return render(request, 'donors/donor_detail.html', context)
+
+
+def guide_view(request):
+    """User guide for the platform."""
+    return render(request, 'donors/guide.html')
 
 
 def register_view(request):
