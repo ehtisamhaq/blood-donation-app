@@ -1,0 +1,229 @@
+{% extends 'donors/base.html' %}
+
+{% block title %}Emergency Blood Requests Feed - RedPulse{% endblock %}
+
+{% block content %}
+<div class="bg-slate-900 text-white py-12 border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-600/30 border border-red-500/40 text-red-300 text-xs font-bold uppercase tracking-wider mb-3">
+                    <span class="w-2 h-2 rounded-full bg-red-400 animate-pulse"></span>
+                    Live Emergency Board
+                </div>
+                <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Blood Requests Feed</h1>
+                <p class="text-slate-300 text-sm mt-2 max-w-2xl">
+                    Browse active blood appeals from hospitals and patients. Contact the patient's family immediately if you or someone you know matches.
+                </p>
+            </div>
+            <div>
+                <a href="{% url 'create_request' %}" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3.5 rounded-xl shadow-lg shadow-red-600/30 transition text-sm">
+                    <i class="fa-solid fa-plus-circle"></i>
+                    Post New Request
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters and Content -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <!-- Filter Bar Card -->
+    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 mb-8">
+        <form method="GET" action="{% url 'requests_list' %}" class="space-y-4">
+            <!-- Search + Location row -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Search Keyword</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                        <input type="text" name="q" value="{{ query }}" placeholder="Patient, hospital, reason..." class="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Blood Group</label>
+                    <select name="blood_group" class="w-full py-2 px-3 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white">
+                        <option value="">All Blood Groups</option>
+                        {% for code, name in blood_groups %}
+                            <option value="{{ code }}" {% if blood_group == code %}selected{% endif %}>{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Urgency</label>
+                    <select name="urgency" class="w-full py-2 px-3 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white">
+                        <option value="">All Urgency Levels</option>
+                        {% for code, name in urgency_levels %}
+                            <option value="{{ code }}" {% if urgency == code %}selected{% endif %}>{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">City / Region</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-location-dot absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                        <input type="text" name="location" value="{{ location }}" placeholder="Filter by city..." class="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Tabs & Submit -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-slate-100">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold text-slate-500 uppercase mr-1">Status:</span>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="status" value="active" {% if status == 'active' %}checked{% endif %} onchange="this.form.submit()" class="sr-only peer">
+                        <span class="px-3 py-1 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 peer-checked:bg-red-600 peer-checked:text-white transition">Active Only</span>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="status" value="fulfilled" {% if status == 'fulfilled' %}checked{% endif %} onchange="this.form.submit()" class="sr-only peer">
+                        <span class="px-3 py-1 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 peer-checked:bg-emerald-600 peer-checked:text-white transition">Fulfilled</span>
+                    </label>
+                    <label class="cursor-pointer">
+                        <input type="radio" name="status" value="all" {% if status == 'all' %}checked{% endif %} onchange="this.form.submit()" class="sr-only peer">
+                        <span class="px-3 py-1 rounded-lg text-xs font-semibold text-slate-600 bg-slate-100 peer-checked:bg-slate-800 peer-checked:text-white transition">All</span>
+                    </label>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    {% if query or blood_group or urgency or location or status != 'active' %}
+                        <a href="{% url 'requests_list' %}" class="text-xs font-bold text-slate-500 hover:text-slate-800 px-3 py-2">Clear Filters</a>
+                    {% endif %}
+                    <button type="submit" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition">
+                        Apply Filters
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Header -->
+    <div class="flex items-center justify-between mb-6">
+        <p class="text-sm font-semibold text-slate-600">
+            Showing <span class="text-slate-900 font-bold">{{ page_obj.paginator.count }}</span> request{{ page_obj.paginator.count|pluralize }}
+        </p>
+    </div>
+
+    <!-- Requests Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for req in page_obj %}
+        <div class="bg-white rounded-2xl shadow-sm hover:shadow-lg border border-slate-200/90 transition flex flex-col justify-between overflow-hidden {% if req.is_fulfilled %}opacity-75 bg-slate-50/50{% endif %}">
+            <div class="p-5">
+                <!-- Badges -->
+                <div class="flex items-center justify-between gap-2 mb-3">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-base font-extrabold {% if req.is_fulfilled %}bg-slate-600 text-white{% else %}bg-red-600 text-white shadow-sm shadow-red-600/30{% endif %}">
+                        <i class="fa-solid fa-droplet text-xs"></i>
+                        {{ req.blood_group }}
+                    </span>
+                    <div class="flex items-center gap-1.5">
+                        {% if req.is_fulfilled %}
+                            <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
+                                <i class="fa-solid fa-check"></i> Fulfilled
+                            </span>
+                        {% else %}
+                            <span class="text-xs font-semibold text-slate-600 bg-slate-100 px-2 py-1 rounded-lg">
+                                {{ req.units_needed }} bag{{ req.units_needed|pluralize }}
+                            </span>
+                            {% if req.urgency == 'CRITICAL' %}
+                                <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-100 text-rose-700 border border-rose-200 animate-pulse">
+                                    Critical
+                                </span>
+                            {% elif req.urgency == 'URGENT' %}
+                                <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                                    Urgent
+                                </span>
+                            {% else %}
+                                <span class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-100 text-blue-800">
+                                    Standard
+                                </span>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Patient & Hospital -->
+                <h3 class="font-bold text-lg text-slate-900 truncate mb-1">
+                    {{ req.patient_name }}
+                </h3>
+
+                <div class="space-y-1 text-xs text-slate-600">
+                    <p class="flex items-center gap-2 truncate">
+                        <i class="fa-regular fa-hospital text-slate-400 w-4"></i>
+                        <span>{{ req.hospital }}</span>
+                    </p>
+                    <p class="flex items-center gap-2 truncate">
+                        <i class="fa-solid fa-location-dot text-slate-400 w-4"></i>
+                        <span>{{ req.location }}</span>
+                    </p>
+                    {% if req.needed_by %}
+                    <p class="flex items-center gap-2 text-rose-600 font-semibold">
+                        <i class="fa-regular fa-calendar text-rose-500 w-4"></i>
+                        <span>Needed by: {{ req.needed_by|date:"M d, Y" }}</span>
+                    </p>
+                    {% endif %}
+                </div>
+
+                {% if req.notes %}
+                    <p class="text-xs text-slate-600 mt-3 line-clamp-2 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                        {{ req.notes }}
+                    </p>
+                {% endif %}
+
+                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+                    <span>Posted by {{ req.requester.first_name|default:req.requester.username }}</span>
+                    <span>{{ req.created_at|timesince }} ago</span>
+                </div>
+            </div>
+
+            <!-- Actions footer -->
+            <div class="p-3 bg-slate-50 border-t border-slate-100 flex items-center gap-2">
+                {% if not req.is_fulfilled %}
+                <a href="tel:{{ req.contact_number }}" class="flex-1 inline-flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-2.5 px-3 rounded-xl shadow-sm transition">
+                    <i class="fa-solid fa-phone"></i>
+                    Call {{ req.contact_number }}
+                </a>
+                {% endif %}
+                <a href="{% url 'request_detail' req.pk %}" class="{% if req.is_fulfilled %}w-full{% endif %} inline-flex items-center justify-center bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl transition">
+                    Full Details
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full text-center py-16 bg-white rounded-2xl border border-slate-200 p-8">
+            <div class="w-16 h-16 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-2xl mb-3">
+                <i class="fa-solid fa-filter-circle-xmark"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-800">No requests match your current filters</h3>
+            <p class="text-xs text-slate-500 mt-1">Try changing your search terms or blood group filters.</p>
+            <a href="{% url 'requests_list' %}" class="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-red-600 hover:underline">
+                Reset All Filters
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="flex items-center justify-center gap-2 mt-10">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}&q={{ query }}&blood_group={{ blood_group }}&urgency={{ urgency }}&location={{ location }}&status={{ status }}" class="px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50">
+                &larr; Previous
+            </a>
+        {% endif %}
+
+        <span class="text-xs font-semibold text-slate-600 px-3">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}&q={{ query }}&blood_group={{ blood_group }}&urgency={{ urgency }}&location={{ location }}&status={{ status }}" class="px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50">
+                Next &rarr;
+            </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

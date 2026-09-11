@@ -1,0 +1,197 @@
+{% extends 'donors/base.html' %}
+
+{% block title %}Find Blood Donors Directory - RedPulse{% endblock %}
+
+{% block content %}
+<div class="bg-slate-900 text-white py-12 border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/30 text-rose-300 text-xs font-bold uppercase tracking-wider mb-3">
+                    <i class="fa-solid fa-heart-pulse"></i>
+                    Community Heroes
+                </div>
+                <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Verified Blood Donors</h1>
+                <p class="text-slate-300 text-sm mt-2 max-w-2xl">
+                    Search registered volunteers ready to donate blood in your area. Contact available donors directly for urgent medical needs.
+                </p>
+            </div>
+            <div>
+                <a href="{% url 'register' %}" class="inline-flex items-center gap-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-bold px-6 py-3.5 rounded-xl shadow-lg shadow-red-600/30 transition text-sm">
+                    <i class="fa-solid fa-user-plus"></i>
+                    Join as a Donor
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <!-- Filter Card -->
+    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 mb-8">
+        <form method="GET" action="{% url 'donors_list' %}" class="space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <!-- Keyword search -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Search Name / Bio</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                        <input type="text" name="q" value="{{ query }}" placeholder="Search donor name..." class="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                    </div>
+                </div>
+
+                <!-- Blood Group -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Blood Group</label>
+                    <select name="blood_group" class="w-full py-2 px-3 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white">
+                        <option value="">All Blood Groups</option>
+                        {% for code, name in blood_groups %}
+                            <option value="{{ code }}" {% if blood_group == code %}selected{% endif %}>{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- City -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">City / Region</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-location-dot absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                        <input type="text" name="city" value="{{ city }}" placeholder="Enter city..." class="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                    </div>
+                </div>
+
+                <!-- Availability toggle & Submit -->
+                <div class="flex items-end gap-2">
+                    <div class="flex-1 flex items-center h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl">
+                        <label class="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-700">
+                            <input type="checkbox" name="available_only" value="1" {% if available_only == '1' %}checked{% endif %} class="rounded text-red-600 focus:ring-red-500">
+                            <span>Available Only</span>
+                        </label>
+                    </div>
+                    <button type="submit" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-5 h-10 rounded-xl transition">
+                        Filter
+                    </button>
+                </div>
+            </div>
+
+            {% if query or blood_group or city or available_only != '1' %}
+            <div class="pt-2 flex items-center justify-between border-t border-slate-100 text-xs">
+                <span class="text-slate-500">Active filters applied</span>
+                <a href="{% url 'donors_list' %}" class="text-red-600 font-bold hover:underline">Clear all filters</a>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Results count -->
+    <div class="flex items-center justify-between mb-6">
+        <p class="text-sm font-semibold text-slate-600">
+            Found <span class="text-slate-900 font-bold">{{ page_obj.paginator.count }}</span> registered donor{{ page_obj.paginator.count|pluralize }}
+        </p>
+    </div>
+
+    <!-- Donors Cards Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {% for donor in page_obj %}
+        <div class="bg-white rounded-2xl p-5 shadow-sm hover:shadow-lg border border-slate-200/80 transition flex flex-col justify-between">
+            <div>
+                <!-- Top blood tag & user info -->
+                <div class="flex items-start justify-between gap-3 mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-slate-900 to-slate-700 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+                            {{ donor.user.first_name|first|default:donor.user.username|first|upper }}
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-sm truncate max-w-[130px]">
+                                {{ donor.user.get_full_name|default:donor.user.username }}
+                            </h3>
+                            <span class="text-xs text-slate-500 flex items-center gap-1">
+                                <i class="fa-solid fa-location-dot text-[10px] text-red-500"></i>
+                                {{ donor.city }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <span class="w-11 h-11 rounded-xl bg-red-50 text-red-700 border border-red-200 flex items-center justify-center font-black text-sm">
+                        {{ donor.blood_group }}
+                    </span>
+                </div>
+
+                <!-- Status details -->
+                <div class="space-y-2 text-xs text-slate-600 mb-4 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-500">Availability:</span>
+                        {% if donor.is_available %}
+                            <span class="font-bold text-emerald-600 flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Available
+                            </span>
+                        {% else %}
+                            <span class="font-semibold text-slate-400 flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Unavailable
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-500">Medical Eligibility:</span>
+                        {% if donor.is_eligible_to_donate %}
+                            <span class="text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded text-[11px]">Eligible Now</span>
+                        {% else %}
+                            <span class="text-amber-700 font-semibold bg-amber-50 px-2 py-0.5 rounded text-[11px]">In Cooldown ({{ donor.days_until_eligible }}d)</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-500">Total Donations:</span>
+                        <strong class="text-slate-800">{{ donor.total_donations }} time{{ donor.total_donations|pluralize }}</strong>
+                    </div>
+                </div>
+
+                {% if donor.bio %}
+                <p class="text-xs text-slate-500 line-clamp-2 mb-4 italic">
+                    "{{ donor.bio }}"
+                </p>
+                {% endif %}
+            </div>
+
+            <!-- Action button -->
+            <a href="{% url 'donor_detail' donor.pk %}" class="w-full text-center bg-slate-900 hover:bg-red-600 text-white text-xs font-bold py-2.5 rounded-xl transition">
+                View Profile & Contact
+            </a>
+        </div>
+        {% empty %}
+        <div class="col-span-full text-center py-16 bg-white rounded-2xl border border-slate-200 p-8">
+            <div class="w-16 h-16 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-2xl mb-3">
+                <i class="fa-solid fa-user-slash"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-800">No Donors Found</h3>
+            <p class="text-xs text-slate-500 mt-1">Try expanding your search or clearing city/blood group filters.</p>
+            <a href="{% url 'donors_list' %}" class="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-red-600 hover:underline">
+                Reset All Filters
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="flex items-center justify-center gap-2 mt-10">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}&q={{ query }}&blood_group={{ blood_group }}&city={{ city }}&available_only={{ available_only }}" class="px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50">
+                &larr; Previous
+            </a>
+        {% endif %}
+
+        <span class="text-xs font-semibold text-slate-600 px-3">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}&q={{ query }}&blood_group={{ blood_group }}&city={{ city }}&available_only={{ available_only }}" class="px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50">
+                Next &rarr;
+            </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

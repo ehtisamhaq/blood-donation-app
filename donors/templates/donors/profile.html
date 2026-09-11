@@ -1,0 +1,171 @@
+{% extends 'donors/base.html' %}
+
+{% block title %}My Dashboard & Profile - RedPulse{% endblock %}
+
+{% block content %}
+<div class="bg-slate-900 text-white py-10 border-b border-slate-800">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-red-600 to-rose-500 text-white flex items-center justify-center font-black text-2xl shadow-lg shadow-red-600/30">
+                    {{ donor_profile.blood_group }}
+                </div>
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-black text-white">
+                        Welcome, {{ user.first_name|default:user.username }}!
+                    </h1>
+                    <p class="text-xs sm:text-sm text-slate-300 mt-1">
+                        Blood Group: <strong class="text-white">{{ donor_profile.blood_group }}</strong> • Location: <strong class="text-white">{{ donor_profile.city }}</strong>
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <a href="{% url 'create_request' %}" class="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition">
+                    <i class="fa-solid fa-plus-circle"></i>
+                    Post Blood Request
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Edit Profile Form -->
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200/90">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900">My Donor Profile Information</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">Keep your availability and contact details accurate to receive donation requests.</p>
+                    </div>
+                </div>
+
+                <form method="POST" class="space-y-5">
+                    {% csrf_token %}
+
+                    <!-- Availability Toggle Box -->
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-4">
+                        <div>
+                            <span class="block text-sm font-bold text-slate-900">Current Donation Availability</span>
+                            <span class="text-xs text-slate-500">Uncheck this if you are temporarily unavailable or traveling.</span>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            {{ form.is_available }}
+                            <span class="ml-2 text-xs font-bold {% if donor_profile.is_available %}text-emerald-600{% else %}text-slate-500{% endif %}">
+                                {% if donor_profile.is_available %}Available{% else %}Unavailable{% endif %}
+                            </span>
+                        </label>
+                    </div>
+
+                    <!-- Names -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">First Name</label>
+                            {{ form.first_name }}
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Last Name</label>
+                            {{ form.last_name }}
+                        </div>
+                    </div>
+
+                    <!-- Email & Phone -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Email Address</label>
+                            {{ form.email }}
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Contact Phone</label>
+                            {{ form.phone }}
+                        </div>
+                    </div>
+
+                    <!-- Blood Group & City -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Blood Group</label>
+                            {{ form.blood_group }}
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">City / Region</label>
+                            {{ form.city }}
+                        </div>
+                    </div>
+
+                    <!-- Address -->
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Neighborhood / Address</label>
+                        {{ form.address }}
+                    </div>
+
+                    <!-- Donation History Fields -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Total Lifetime Donations</label>
+                            {{ form.total_donations }}
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">Last Donation Date</label>
+                            {{ form.last_donated }}
+                        </div>
+                    </div>
+
+                    <!-- Bio -->
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">About Me / Notes</label>
+                        {{ form.bio }}
+                    </div>
+
+                    <!-- Submit -->
+                    <div class="pt-4 flex justify-end">
+                        <button type="submit" class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-6 py-3 rounded-xl text-sm transition">
+                            Save Profile Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Right Side: My Submitted Blood Requests -->
+        <div class="space-y-6">
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200/90 space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h3 class="font-bold text-slate-900 text-base">My Blood Requests</h3>
+                    <span class="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">{{ user_requests.count }}</span>
+                </div>
+
+                <div class="space-y-3">
+                    {% for req in user_requests %}
+                    <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2 py-0.5 rounded-lg text-xs font-black bg-red-600 text-white">{{ req.blood_group }}</span>
+                            {% if req.is_fulfilled %}
+                                <span class="text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">Fulfilled</span>
+                            {% else %}
+                                <span class="text-[11px] font-bold text-rose-700 bg-rose-100 px-2 py-0.5 rounded">Active</span>
+                            {% endif %}
+                        </div>
+
+                        <h4 class="text-sm font-bold text-slate-900 truncate">{{ req.patient_name }}</h4>
+                        <p class="text-xs text-slate-500 truncate">{{ req.hospital }} • {{ req.units_needed }} bag{{ req.units_needed|pluralize }}</p>
+
+                        <div class="pt-2 flex items-center justify-between border-t border-slate-200/60 text-xs">
+                            <a href="{% url 'request_detail' req.pk %}" class="font-bold text-slate-700 hover:underline">View</a>
+                            <a href="{% url 'edit_request' req.pk %}" class="text-slate-500 hover:text-slate-800">Edit</a>
+                            <a href="{% url 'toggle_fulfill_request' req.pk %}" class="font-bold {% if req.is_fulfilled %}text-slate-600{% else %}text-emerald-600{% endif %} hover:underline">
+                                {% if req.is_fulfilled %}Re-open{% else %}Mark Fulfilled{% endif %}
+                            </a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-xs text-slate-500 text-center py-4">You haven't posted any emergency requests.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

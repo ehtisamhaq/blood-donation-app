@@ -1,0 +1,141 @@
+{% extends 'donors/base.html' %}
+
+{% block title %}{{ donor.user.get_full_name|default:donor.user.username }} ({{ donor.blood_group }}) - Blood Donor Profile{% endblock %}
+
+{% block content %}
+<div class="bg-slate-900 text-white py-10 border-b border-slate-800">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <a href="{% url 'donors_list' %}" class="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white mb-4 transition">
+            <i class="fa-solid fa-arrow-left"></i>
+            Back to Donors Directory
+        </a>
+
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+            <div class="flex items-center gap-4">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-red-600 to-rose-500 text-white flex items-center justify-center font-black text-2xl shadow-lg shadow-red-600/30 shrink-0">
+                    {{ donor.blood_group }}
+                </div>
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        {% if donor.is_available %}
+                            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block mr-1"></span> Available to Donate
+                            </span>
+                        {% else %}
+                            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-700 text-slate-300">
+                                Temporarily Unavailable
+                            </span>
+                        {% endif %}
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-black text-white">
+                        {{ donor.user.get_full_name|default:donor.user.username }}
+                    </h1>
+                    <p class="text-xs sm:text-sm text-slate-300 flex items-center gap-1.5 mt-1">
+                        <i class="fa-solid fa-location-dot text-red-500"></i>
+                        {{ donor.city }}{% if donor.address %}, {{ donor.address }}{% endif %}
+                    </p>
+                </div>
+            </div>
+
+            {% if user == donor.user %}
+            <a href="{% url 'profile' %}" class="bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl border border-slate-700 transition">
+                <i class="fa-solid fa-pen-to-square mr-1"></i> Edit My Profile
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Main details -->
+        <div class="md:col-span-2 space-y-6">
+            <!-- Donation History & Eligibility -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/90 space-y-4">
+                <h2 class="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-award text-red-600"></i>
+                    Donor Information & Stats
+                </h2>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <span class="text-xs text-slate-500 font-medium block">Total Blood Donations</span>
+                        <strong class="text-2xl font-black text-slate-900">{{ donor.total_donations }}</strong>
+                        <span class="text-xs text-slate-500 block mt-0.5">Lives touched</span>
+                    </div>
+
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <span class="text-xs text-slate-500 font-medium block">Medical Eligibility</span>
+                        {% if donor.is_eligible_to_donate %}
+                            <strong class="text-base font-bold text-emerald-600 flex items-center gap-1 mt-1">
+                                <i class="fa-solid fa-circle-check"></i> Eligible Now
+                            </strong>
+                            <span class="text-xs text-slate-500 block mt-0.5">Ready for whole blood donation</span>
+                        {% else %}
+                            <strong class="text-base font-bold text-amber-600 flex items-center gap-1 mt-1">
+                                <i class="fa-solid fa-clock"></i> In Cooldown
+                            </strong>
+                            <span class="text-xs text-slate-500 block mt-0.5">Eligible in ~{{ donor.days_until_eligible }} days</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <span class="text-xs text-slate-500 font-medium block">Last Donated Date</span>
+                        <strong class="text-sm font-bold text-slate-800">
+                            {{ donor.last_donated|date:"F d, Y"|default:"Not recorded yet" }}
+                        </strong>
+                    </div>
+
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <span class="text-xs text-slate-500 font-medium block">Member Since</span>
+                        <strong class="text-sm font-bold text-slate-800">
+                            {{ donor.created_at|date:"F Y" }}
+                        </strong>
+                    </div>
+                </div>
+
+                {% if donor.bio %}
+                <div class="pt-2">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Donor Bio & Notes</h3>
+                    <div class="bg-slate-50 border border-slate-100 p-4 rounded-xl text-slate-700 text-sm leading-relaxed">
+                        {{ donor.bio }}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Requester Guideline Card -->
+            <div class="bg-rose-50/70 border border-rose-100 p-5 rounded-2xl text-xs text-rose-900 space-y-2">
+                <h4 class="font-bold uppercase tracking-wider text-rose-800 flex items-center gap-1.5">
+                    <i class="fa-solid fa-shield-heart"></i>
+                    Respectful Contact Etiquette
+                </h4>
+                <p>Blood donors are unpaid volunteers giving the gift of life. When calling, please state the patient's name, hospital location, and urgency clearly and politely.</p>
+            </div>
+        </div>
+
+        <!-- Contact Actions Sidebar -->
+        <div class="space-y-4">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/90 space-y-4">
+                <h3 class="text-sm font-bold uppercase tracking-wider text-slate-500">Contact Donor</h3>
+
+                {% if donor.phone %}
+                <div class="space-y-3">
+                    <a href="tel:{{ donor.phone }}" class="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-md shadow-red-600/20 transition text-sm">
+                        <i class="fa-solid fa-phone"></i>
+                        <span>Call {{ donor.phone }}</span>
+                    </a>
+
+                    <a href="https://wa.me/{{ donor.phone|cut:' '|cut:'-'|cut:'+' }}?text=Hello%20{{ donor.user.first_name }},%20I%20saw%20your%20blood%20donor%20profile%20on%20RedPulse%20and%20wanted%20to%20check%20if%20you%20are%20available%20for%20a%20blood%20donation." target="_blank" class="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-md shadow-emerald-600/20 transition text-sm">
+                        <i class="fa-brands fa-whatsapp text-lg"></i>
+                        <span>WhatsApp Donor</span>
+                    </a>
+                </div>
+                {% else %}
+                <p class="text-xs text-slate-500 text-center py-2">No direct phone number provided.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

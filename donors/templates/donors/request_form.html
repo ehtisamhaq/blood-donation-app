@@ -1,0 +1,167 @@
+{% extends 'donors/base.html' %}
+
+{% block title %}{{ page_title }} - RedPulse{% endblock %}
+
+{% block content %}
+<div class="bg-slate-900 text-white py-10 border-b border-slate-800">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div class="w-12 h-12 rounded-2xl bg-red-600 text-white flex items-center justify-center mx-auto mb-3 text-xl shadow-lg shadow-red-600/30">
+            <i class="fa-solid fa-hand-holding-droplet"></i>
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">{{ page_title }}</h1>
+        <p class="text-slate-300 text-sm mt-2">
+            Fill out accurate patient and hospital information so nearby volunteer donors can respond quickly.
+        </p>
+    </div>
+</div>
+
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200/90">
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <!-- Patient and Blood Group -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="sm:col-span-2">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                        Patient Full Name <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.patient_name }}
+                    {% if form.patient_name.errors %}
+                        <p class="text-xs text-red-600 mt-1">{{ form.patient_name.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                        Blood Group <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.blood_group }}
+                    {% if form.blood_group.errors %}
+                        <p class="text-xs text-red-600 mt-1">{{ form.blood_group.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Units & Urgency -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                        Units / Bags Needed <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.units_needed }}
+                    {% if form.units_needed.errors %}
+                        <p class="text-xs text-red-600 mt-1">{{ form.units_needed.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                        Urgency Level <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.urgency }}
+                    {% if form.urgency.errors %}
+                        <p class="text-xs text-red-600 mt-1">{{ form.urgency.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Hospital & City -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                        Hospital Name <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.hospital }}
+                    {% if form.hospital.errors %}
+                        <p class="text-xs text-red-600 mt-1">{{ form.hospital.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                        City / District <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.location }}
+                    {% if form.location.errors %}
+                        <p class="text-xs text-red-600 mt-1">{{ form.location.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Hospital Address & Needed By -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                        Hospital Address / Ward (Optional)
+                    </label>
+                    {{ form.hospital_address }}
+                    {% if form.hospital_address.errors %}
+                        <p class="text-xs text-red-600 mt-1">{{ form.hospital_address.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                        Needed By Date (Optional)
+                    </label>
+                    {{ form.needed_by }}
+                    {% if form.needed_by.errors %}
+                        <p class="text-xs text-red-600 mt-1">{{ form.needed_by.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Contact Numbers -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                        Primary Contact Phone <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.contact_number }}
+                    {% if form.contact_number.errors %}
+                        <p class="text-xs text-red-600 mt-1">{{ form.contact_number.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                        Alternate Contact (Optional)
+                    </label>
+                    {{ form.alternate_contact }}
+                    {% if form.alternate_contact.errors %}
+                        <p class="text-xs text-red-600 mt-1">{{ form.alternate_contact.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Case Notes -->
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                    Medical Notes & Instructions (Optional)
+                </label>
+                {{ form.notes }}
+                {% if form.notes.errors %}
+                    <p class="text-xs text-red-600 mt-1">{{ form.notes.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Submit Button -->
+            <div class="pt-4 flex items-center justify-end gap-3 border-t border-slate-100">
+                <a href="{% url 'requests_list' %}" class="px-5 py-3 rounded-xl border border-slate-300 text-slate-700 text-sm font-semibold hover:bg-slate-50 transition">
+                    Cancel
+                </a>
+                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold px-7 py-3 rounded-xl shadow-lg shadow-red-600/30 transition text-sm">
+                    {% if is_edit %}Save Changes{% else %}Publish Blood Request{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
